@@ -1,7 +1,7 @@
 [etcd-node]
-176.9.123.237 coreos_hostname=core01
-176.9.122.117 coreos_hostname=core02
-176.9.118.230 coreos_hostname=core03
+<ip_address node1> coreos_hostname=<hostname node1>
+<ip_address node2> coreos_hostname=<hostname node2>
+<ip_address node3> coreos_hostname=<hostname node3>
 [etcd-proxy]
 
 
@@ -10,46 +10,65 @@ etcd-node
 etcd-proxy
 
 [kubernetes-master]
-176.9.123.237 
-176.9.122.117
+<ip_address node1> 
+<ip_address node2>
 [kubernetes-node]
-176.9.118.230
+<ip_address node3>
 [kubernetes:children]
 kubernetes-master
 kubernetes-node
 [ceph-mon]
-176.9.123.237
-176.9.122.117
-176.9.118.230
+<ip_address node1>
+<ip_address node2>
+<ip_address node3>
 [ceph-osd]
-176.9.123.237
-176.9.122.117
-176.9.118.230
-
-[ingres]
-176.9.122.117
-176.9.118.230
+<ip_address node1>
+<ip_address node2>
+<ip_address node3>
 
 [all:vars]
-#kube_master_dns_name=kubemaster.bettertest.de
-hyperkube_aci=quay.io/cornelius/hyperkube
-hyperkube_aci_tag=v1.5.1_coreos.0
-kube_master_ip=176.9.123.237
-kube_cluster_name=privat
-kubernetes_version=1.5.1
+kube_master_dns_name=kube.akilion.biz
+kube_master_ip=<ip_address node1>
+kube_cluster_name=<your cluster name>
 k8s_service_ip_range=10.100.0.0/16
 k8s_service_ip=10.100.0.1
 k8s_dns_service_ip=10.100.0.10
-k8s_dns_domain=cluster.local
-hetzner_webservice_username=<hetzner_webeservice_username>
-hetzner_webservice_password=<hetzner_webservice_password>
-baremetal_provider=hetzner
+k8s_dns_domain=<your cluster dns name for ex. myCluster.local>
+hyperkube_aci=quay.io/cornelius/hyperkube #This should be explained why we need a home build hypercube.
+hyperkube_aci_tag=v1.5.1_coreos.0
+kubernetes_version=1.5.1
 kubectl_checksum=4d56b8fbec4a274a61893d244bfce532cadf313632a31a065a0edf7130066ac6
+
+# Global variables definition
 ansible_python_interpreter=/home/core/pypy/bin/python
-ceph_fsid=<ceph_fsid> # generate with uuidgen
-ceph_key=<ceph_key>   # generate with python ceph-key.py ( in this directory )
-ceph_osd_dir=/home/core/data/ceph/osd
-ceph_osd_type=osd_disk
-ceph_osd_device=/dev/sdb
-rescue_authorized_key=<fingerprint of ssh key to use in rescue mode>
-ingres_failover_ip=<failover ip to use for ingres>
+
+#(Required) User this section to configure ceph installation
+# generate ceph_sid with uuidgen
+ceph_fsid=<to be generated> 
+# generate with python ceph-key.py ( in this directory )
+ceph_key='<to be generated>'
+##Uncomment this section if you want to use a directory as osd partition 
+#ceph_osd_type=osd_directory # Can be osd_directory or osd_disk
+#ceph_osd_dir=<path to directory>
+##Uncomment this section if you want to use a directory as osd partition 
+#ceph_osd_type=osd_isk # Can be osd_directory or osd_disk
+#ceph osd drive=<path to a device (e.g. /dev/sdb) >
+
+#(Optional) Use this section is you want to create a default coreos user
+#Username for a user that will ne created on every nodes
+coreos_user_username=
+#Please refer to https://coreos.com/os/docs/latest/cloud-config.html#users to know how to generate password hash
+coreos_user_password=
+#Add a copy of public key to be authorized for this user
+coreos_user_authorizedkey=
+
+#(Required) Use this section to setup the ssh public keys
+coreos_public_keys=<public ssh key to be authorized for core user on every nodes>
+
+#(Required for hetzner provider) Use this section to configure acces to hetzner web service
+# Refer to provider section in docs/getting_started.md documenation for futher details.
+baremetal_provider=hetzner
+#Create a webservice account on hetzner robou web interface
+hetzner_webservice_username=<username provided by hetzner web interface>
+hetzner_webservice_password=<password provided by hetzner web interface>
+rescue_authorized_key=<fingerprint of the ssh key provided for rescue mode in hetzner web interface>

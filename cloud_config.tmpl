@@ -2,9 +2,7 @@
 
 hostname: {{ coreos_hostname }}
 ssh_authorized_keys:
-  {% for key in coreos_public_keys %}
-  - {{ key }}
-  {% endfor %}
+  - {{ coreos_public_keys }}
 
 users:
   - name: kubernetes

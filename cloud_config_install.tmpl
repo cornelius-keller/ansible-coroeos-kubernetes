@@ -2,17 +2,15 @@
 
 hostname: {{ coreos_hostname }}
 ssh_authorized_keys:
-  {% for key in coreos_public_keys %}
-  - {{ key }}
-  {% endfor %}
+  - {{ coreos_public_keys }}
 
 users:
- - name: ckeller
-   passwd: $6$rounds=4096$J7Tu90fzSD$tGhcITQVJ3w7wgbG8NEUC.D5yshxIqz5U3BJQqnG1hTFDv2qXhsbqR9eNlojaoJGTOQ7Zzh1MWN4roURxNRWk0
+ - name: {{ coreos_user_username }}
+   passwd: {{ coreos_user_password }}
    groups:
      - "sudo"
-   ssh-authorized-keys:
-     - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDL0pihrE0QLoCmSM8MdXvvdXzVQDvR79K4YXK3kI13fLBk2EDW2VpyuWDL+87lgz/eruQqHC4YoO2Y60QT8fJLs9hHQdxQePLwCjYYdiGhZkIAiuX7oZFKLAoY/pEqgCd312OdNm/nnGckpSnepGhScw2B1gHl6Au6O75oOX3lZYywEuK4zgcKCD0v6wjKUTSeznuE6VqmuwU9sGA9+5ldvwCT/4zE57Q96BdCM+pbaji5/92gKa2P9PlJxM+sRTxADDfRIhdPPmY18IT7clKk1kfRAYG/3ccZ4YpiD6bqVS89wPtatlwLL0YLS7bxWd772Mq+CZoFnAM2JTvDRxDiy0CYcck4HTBbcBmKGeXx+0S9jqpfRTEZA9gbYJ8xCLroJE7WOT5zQAv65SWL0v48xf5j+BXYPIAcZZNM1AOSkY63fb1CXbIzg2eQ3hqvyIjFywPxJdXZJVr34DWVsk3mHMschS2HPDEkrLdiMO5zcJt6+FSadTo1QaggMGhWnYRal93te0wEbC3clXfoutMufvhigNsmFCSL8qwYcPSFA8zLJdjuxOpO0+Uj54npTFoaVIaAuLdxsU5VTYCAq40aeAR3fVfLk8xOd788VPBlm+64KpgOnksa64gtK7kdH0lRBrydVsHm2xQ7qzs4uxZEyyYDAr3AvfjJNLfwzM+njQ== ssh key of cke
+   ssh-authorized-keys: 
+     - {{ coreos_user_authorizedkey }}
 
 coreos:
   update:
