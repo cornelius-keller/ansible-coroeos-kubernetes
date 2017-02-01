@@ -2,9 +2,7 @@
 
 hostname: {{ coreos_hostname }}
 ssh_authorized_keys:
-  {% for key in coreos_public_keys %}
-  - {{ key }}
-  {% endfor %}
+  - {{ coreos_public_keys }}
 
 users:
   - name: kubernetes
@@ -12,7 +10,7 @@ users:
       - {{ kubernetes_ssh_public_key }}
 
 
-    
+
 
 write_files:
   - path: /etc/kubernetes/ssh/id_rsa
@@ -60,7 +58,7 @@ write_files:
       /opt/bin/wait-for-apiserver
       /usr/bin/docker run --rm --net=host -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ quay.io/cornelius/hyperkube:v1.3.5_coreos.1 \
       /hyperkube kubectl --client-key=/etc/kubernetes/ssl/worker-key.pem --client-certificate=/etc/kubernetes/ssl/worker.pem \
-      --server=https://127.0.0.1:8888 --certificate-authority=/etc/kubernetes/ssl/ca.pem get nodes  | grep {{ inventory_hostname }} | grep  -q SchedulingDisabled 
+      --server=https://127.0.0.1:8888 --certificate-authority=/etc/kubernetes/ssl/ca.pem get nodes  | grep {{ inventory_hostname }} | grep  -q SchedulingDisabled
   - path: /opt/bin/uncordon-node
     permissions: '0775'
     content: |
@@ -78,15 +76,15 @@ write_files:
       #!/bin/bash
 
       ERR=1 # or some non zero error number you want
-      MAX_TRIES=4 
+      MAX_TRIES=4
       COUNT=0
       while [  $COUNT -lt $MAX_TRIES ]; do
          /usr/bin/docker run --rm --net=host -v /etc/kubernetes/ssl/:/etc/kubernetes/ssl/ quay.io/cornelius/hyperkube:v1.3.5_coreos.1 /hyperkube kubectl --client-key=/etc/kubernetes/ssl/worker-key.pem --client-certificate=/etc/kubernetes/ssl/worker.pem --server=https://127.0.0.1:8888 --certificate-authority=/etc/kubernetes/ssl/ca.pem drain {{ inventory_hostname }} --ignore-daemonsets=true --force --delete-local-data
          if [ $? -eq 0 ];then
-            while  mount | grep -q foo; do 
+            while  mount | grep -q foo; do
               echo "there are still rbds mountend. waiting another 10 seconds for them to disappear";
               sleep 10;
-            done 
+            done
             echo "all rbds are unmounted"
             echo "sleep another 10 seconds to remove locks"
             sleep 10
@@ -101,26 +99,26 @@ write_files:
     permissions: '0775'
     content: |
       #!/bin/bash
-      # Wrapper for launching kubelet via rkt-fly stage1. 
+      # Wrapper for launching kubelet via rkt-fly stage1.
       #
       # Make sure to set KUBELET_VERSION to an image tag published here:
       # https://quay.io/repository/coreos/hyperkube?tab=tags Alternatively,
       # override $KUBELET_ACI to a custom location.
-      
+
       set -e
-      
+
       if [ -z "${KUBELET_VERSION}" ]; then
           echo "ERROR: must set KUBELET_VERSION"
           exit 1
       fi
-      
+
       KUBELET_ACI="${KUBELET_ACI:-quay.io/coreos/hyperkube}"
-      
+
       mkdir --parents /etc/kubernetes
       mkdir --parents /var/lib/docker
       mkdir --parents /var/lib/kubelet
       mkdir --parents /run/kubelet
-      
+
       exec /usr/bin/rkt run \
         --volume etcd-certs,kind=host,source=/etc/ssl/etcd/ \
         --volume etc-kubernetes,kind=host,source=/etc/kubernetes \
@@ -331,7 +329,7 @@ write_files:
 #              command:
 #              - /hyperkube
 #              - proxy
-#              - --master=https://127.0.0.1:8888 
+#              - --master=https://127.0.0.1:8888
 #              - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
 #              - --proxy-mode=iptables
 #              securityContext:
@@ -392,7 +390,7 @@ write_files:
       # sleep a rondom delay between 0 and five minutes to prevent every machine trying to get the lock at the same time
       delay=$(/usr/bin/expr $RANDOM % 300 )
       sleep $delay
-      
+
       if locksmithctl lock || locksmithctl status | grep `cat /etc/machine-id`; then
         rebootflag='NEED_REBOOT'
         if update_engine_client -status | grep $rebootflag || etcdctl get  /needsreboot/$( cat /etc/machine-id); then
@@ -428,16 +426,16 @@ write_files:
   - path: /etc/etcd-client.config.json
     permissions: '0644'
     content: |
-       { 
+       {
          "cluster": {
          "machines": [ "https://{{ inventory_hostname }}:2379" ] },
-         "config": { 
+         "config": {
             "certFile": "/etc/ssl/etcd/key.crt",
             "keyFile": "/etc/ssl/etcd/key.key",
             "caCertFiles": [ "/etc/ssl/etcd/ca.crt" ],
          "timeout": 5000000000,
          "consistency": "WEAK"
-         } 
+         }
        }
 
   - path: /opt/bin/wait-for-apiserver
@@ -538,7 +536,7 @@ write_files:
     permissions: 0644
     content: |
       {{ etcd_ca_certificate|indent(width=6) }}
-  
+
   - path: /etc/ssl/etcd/key.crt
     permissions: 0644
     content: |
@@ -548,7 +546,7 @@ write_files:
     permissions: 0644
     content: |
       {{ etcd_key|indent(width=6) }}
-  
+
   - path: /etc/ceph/ceph.conf
     content: {{ ceph_conf.content }}
     encoding: base64
@@ -641,7 +639,7 @@ coreos:
 
         [Service]
         EnvironmentFile=/etc/environment
-        ExecStart=/opt/bin/update-window.sh 
+        ExecStart=/opt/bin/update-window.sh
     - name: update-window.timer
       runtime: true
       command: start
@@ -686,7 +684,7 @@ coreos:
 
     - name: docker.service
       command: start
-      drop-ins: 
+      drop-ins:
         - name: 50-wait-for-flannel.conf
           content: |
             [Unit]
@@ -943,7 +941,7 @@ coreos:
            --name haproxy \
            -v /etc/kube_apiserver_haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg \
            -p 127.0.0.1:8888:8080 \
-           haproxy:alpine 
+           haproxy:alpine
          ExecStop=-/usr/bin/docker stop haproxy
          ExecStop=-/usr/bin/docker rm haproxy
          Restart=always
@@ -965,7 +963,7 @@ coreos:
         Description=Tinc Service
         After=etcd.service etcd2.service early-docker.service flanneld.service
         Before=early-docker.target fleet.service
-        
+
         [Service]
         Type=oneshot
         ExecStart=/bin/sh -c "echo \"TINC_HOSTNAME=`hostname | sed -e 's/-/_/g'`\" > /etc/tinc-env"
@@ -1052,7 +1050,7 @@ coreos:
         [Unit]
         Description=Tinc VPN Service
         Requires=flannel-wait.service
-        After=early-docker.service flanneld.service tinc-env.service flannel-wait.service 
+        After=early-docker.service flanneld.service tinc-env.service flannel-wait.service
         Before=kubernetes-networking.target tinc-config-updater.service
 
         [Install]
@@ -1075,7 +1073,7 @@ coreos:
         ExecStartPre=/bin/sh -c "/usr/bin/docker run --rm --volume /srv/tinc:/etc/tinc  jenserat/tinc add Subnet = `echo $FLANNEL_SUBNET | sed -e 's/1\\/24/0\\/24/'`"
         ExecStartPre=/bin/sh -c "/usr/bin/docker run --rm --volume /srv/tinc:/etc/tinc  jenserat/tinc add Mode = switch"
         ExecStartPre=/bin/sh -c "/usr/bin/docker run --rm --volume /srv/tinc:/etc/tinc  jenserat/tinc add DeviceType = tap"
-        ExecStartPre=-/usr/bin/docker rm -f tinc 
+        ExecStartPre=-/usr/bin/docker rm -f tinc
         ExecStartPre=/usr/bin/docker run --name tinc  -d --volume /srv/tinc:/etc/tinc --net=host --device=/dev/net/tun --cap-add NET_ADMIN jenserat/tinc start  -D
 
         ExecStart=/bin/sh -c "while true; do etcdctl set /services/tinc/$TINC_HOSTNAME  \"\\\"` cat /srv/tinc/hosts/$TINC_HOSTNAME `\"\\\" --ttl 60;sleep 45;done"
@@ -1095,7 +1093,7 @@ coreos:
 
         [Install]
         WantedBy=kubernetes-networking.target
-        
+
         [Service]
         Restart=always
         RestartSec=10

@@ -3,3 +3,5 @@
 *-ceph/
 *-loadbalancer/
 *.ini
+config/*
+*.retry

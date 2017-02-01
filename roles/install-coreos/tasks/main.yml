@@ -1,7 +1,8 @@
 ---
-- name: copy cloud confgi
-  template: src=cloud_config_install.tmpl dest=/tmp/cloud-config.yaml
-
+- name: copy cloud config
+  template: 
+    src: cloud_config_install.tmpl 
+    dest: /tmp/cloud-config.yaml
 
 - name: install coreos
   shell: |
@@ -43,11 +44,11 @@
 
 - name: waiting for server to come back
   local_action:
-    module: wait_for
-      host={{ inventory_hostname }}
-      port=22
-      delay=1
-      timeout=200
+      module: wait_for
+      host: "{{ inventory_hostname }}"
+      port: 22
+      delay: 1
+      timeout: 200
 
 - name: remove server from local known_hosts file
   local_action: command  /usr/bin/ssh-keygen -R {{ inventory_hostname }}

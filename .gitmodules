@@ -4,3 +4,9 @@
 [submodule "roles/ansible-coreos-bootstrap"]
 	path = roles/ansible-coreos-bootstrap
 	url = https://github.com/sigma/ansible-coreos-bootstrap.git
+[submodule "images/hyperkube"]
+	path = images/hyperkube
+	url = https://github.com/cornelius-keller/hyperkube.git
+[submodule "images/hetzner-netconf"]
+	path = images/hetzner-netconf
+	url = https://github.com/cornelius-keller/hetzner-netconf.git
